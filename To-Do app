@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-do App with Local Storage</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    .todo-container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #aaa;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #eee;
+      margin: 8px 0;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .done {
+      text-decoration: line-through;
+      color: gray;
+    }
+    button {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h3>To-do App</h3>
+    <input type="text" id="taskInput" placeholder="Enter task..." />
+    <button onclick="addTask()">Add</button>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+
+    // Load saved tasks on page load
+    window.onload = function () {
+      const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      savedTasks.forEach(task => renderTask(task.text, task.done));
+    };
+
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (text === "") return alert("Enter a task");
+      renderTask(text, false);
+      saveTask(text, false);
+      taskInput.value = "";
+    }
+
+    function renderTask(text, isDone) {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.textContent = text;
+      if (isDone) span.classList.add("done");
+
+      const doneBtn = document.createElement("button");
+      doneBtn.textContent = "✓";
+      doneBtn.onclick = () => {
+        span.classList.toggle("done");
+        updateLocalStorage();
+      };
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "X";
+      delBtn.onclick = () => {
+        li.remove();
+        updateLocalStorage();
+      };
+
+      li.appendChild(span);
+      li.appendChild(doneBtn);
+      li.appendChild(delBtn);
+      taskList.appendChild(li);
+    }
+
+    function saveTask(text, done) {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.push({ text, done });
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function updateLocalStorage() {
+      const items = taskList.querySelectorAll("li");
+      const tasks = [];
+      items.forEach(li => {
+        const text = li.querySelector("span").textContent;
+        const done = li.querySelector("span").classList.contains("done");
+        tasks.push({ text, done });
+      });
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+  </script>
+</body>
+</html>
